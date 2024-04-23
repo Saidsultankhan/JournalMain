@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  journal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./journal:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    environment:
+      - DJANGO_DB_HOST=db
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "python manage.py migrate"
+    volumes:
+      - ./journal:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    environment: 
+      - POSTGRES_DB=journal
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+
+volumes:
+  postgres_data:
